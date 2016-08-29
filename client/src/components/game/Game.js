@@ -59,11 +59,15 @@ class Game extends Component {
     onRoll() {
         console.log("Player rolled!");
         if (this.props.roll) {
+            var max = 10;
+            if(this.props.frames && this.props.frames[this.props.currentFrame-1] && this.props.frames[this.props.currentFrame-1].rolls[0] > 0){
+                max = 10 - this.props.frames[this.props.currentFrame-1].rolls[0];
+            }
             this.props.roll({
                 id: this.props.id,
                 user: this.props.username,
                 frameId: this.props.currentFrame || 1,
-                knockedPins: getRandomIntInclusive(0, 10)
+                knockedPins: getRandomIntInclusive(0, max)
             });
             setTimeout(function(){
                 if(this.props.loadGames) this.props.loadGames('/games');
