@@ -31,6 +31,8 @@ import isArray from 'lodash/lang/isArray'
 import includes from 'lodash/collection/includes'
 import find from 'lodash/collection/find'
 import findIndex from 'lodash/array/findIndex'
+import forEach from 'lodash/collection/forEach'
+import every from 'lodash/collection/every'
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
@@ -44,7 +46,7 @@ var proxy = httpProxy.createProxyServer();
 var MongoStore = connectMongo(session);
 var pathToStatic = '/public';
 
-if(NODE_ENV == 'production') {
+if (NODE_ENV == 'production') {
     pathToStatic = __dirname + '/../../public';
 }
 
@@ -89,16 +91,16 @@ const app = Express()
         proxy.web(req, res, {target: `http://0.0.0.0:${websocketConfig[NODE_ENV].port}/ws`});
     })
     .use(historyApiFallbackMiddleware(
-        'index.html', { root: path.resolve(__dirname, "..", "public") }
+        'index.html', {root: path.resolve(__dirname, "..", "public")}
     ))
     .enable('trust proxy')
     .listen(expressPort, restConfig[NODE_ENV].hostname, (error) => {
-    if (!error) {
-        console.log(`REST api is running on port ${expressPort}`); // eslint-disable-line
-    }else{
-        console.error("Rest api failed with error: " + JSON.stringify(error));
-    }
-});
+        if (!error) {
+            console.log(`REST api is running on port ${expressPort}`); // eslint-disable-line
+        } else {
+            console.error("Rest api failed with error: " + JSON.stringify(error));
+        }
+    });
 
 // MongoDB Connection
 mongoose.connect(mongoConfig[NODE_ENV].mongoURL, (error) => {
@@ -146,13 +148,13 @@ export const connections = [];
 
 var io = null;
 
-    io = SocketIo(app);
+io = SocketIo(app);
 
-if(NODE_ENV=='development') {
+if (NODE_ENV == 'development') {
     io.use(monitorio({port: 8000}));
 }
 
-function broadcastToOthers(socket, messageId, data){
+function broadcastToOthers(socket, messageId, data) {
     console.log("Broadcasting...");
     connections.forEach(connectedSocket => {
         if (connectedSocket !== socket) {
@@ -162,27 +164,27 @@ function broadcastToOthers(socket, messageId, data){
     });
 }
 
-function isComplete(game){
+function isComplete(game) {
     var isComplete = true;
-    for( var frame of game.frames ) {
-        if(frame.status != 'complete'){
+    for (var frame of game.frames) {
+        if (frame.status != 'complete') {
             isComplete = false;
         }
-    };
+    }
 
     return isComplete;
 }
 
-function calcFrameResult(rolls){
+function calcFrameResult(rolls) {
     var result = 0;
-    for(var i=0; i<rolls.length; i++){
-        result+=rolls[i];
+    for (var i = 0; i < rolls.length; i++) {
+        result += rolls[i];
     }
     return result;
 }
 /* Websocket API */
 io.on('connection', (socket) => {
-    if(NODE_ENV=='development') {
+    if (NODE_ENV == 'development') {
         socket.monitor('timeConnected', Date.now());
     }
 
@@ -204,22 +206,22 @@ io.on('connection', (socket) => {
         console.log("Message: " + JSON.stringify(message));
 
         const gameId = message && message.payload ? message.payload.id : null;
-        const _user = message && message.payload && message.payload.user ? message.payload.user :  message.payload.username;
+        const _user = message && message.payload && message.payload.user ? message.payload.user : message.payload.username;
         Game.findOne({id: gameId}, (err, game) => {
             if (!err && game && game.status != 'finished') {
 
                 // Remember this for later
                 _id = game.id;
 
-                if(message.type == "ws/join"){
+                if (message.type == "ws/join") {
                     socket.join(_id);
 
                     broadcastToOthers(socket, 'joined', {id: _id, user: _user});
 
                     //socket.emit('joined', {id: _id, user: _user});
-                    if(includes(game.players, _user)){
+                    if (includes(game.players, _user)) {
                         io.sockets.in(_id).emit('error', 'You already joined this game!');
-                    }else{
+                    } else {
                         game.players.push(_user);
                         game.save(function (err, game) {
                             if (!err) {
@@ -234,20 +236,28 @@ io.on('connection', (socket) => {
                     }
                 }
 
-                if(message.type == "ws/roll"){
+                if (message.type == "ws/roll") {
                     console.log(`Player ${_user} rolls: [${message.payload.knockedPins}] on frame ${message.payload.frameId}, current score: ${message.payload.result}`);
-                    var frames = game.frames && isArray(game.frames) ? game.frames: [];
+                    var frames = game.frames && isArray(game.frames) ? game.frames : [];
                     console.log("Rolls before push: " + JSON.stringify(frames));
-                    var currentPlayerFrame = find(game.frames, (f)=>{
-                        return f.playerId = _user && f.id == game.currentFrame;
+                    var currentPlayerFrameIndex = null;
+                    var currentPlayerFrame = find(game.frames, (f, idx)=> {
+                        currentPlayerFrameIndex = idx;
+                        return f.playerId == _user && f.id == game.currentFrame;
                     });
-
+                    console.log("Current player frame: " + JSON.stringify(currentPlayerFrame) + " , " + currentPlayerFrameIndex);
                     var toPush = {};
-                    if(currentPlayerFrame){
+                    if (currentPlayerFrame) {
                         console.log(`Updating the rolls of current frame ${currentPlayerFrame.id}...`);
-                        if(currentPlayerFrame.rolls.length < 2) {
+                        if (currentPlayerFrame.rolls.length < 2) {
                             currentPlayerFrame.rolls.push(message.payload.knockedPins);
                             currentPlayerFrame.result = calcFrameResult(currentPlayerFrame.rolls)
+                        }else{
+                            currentPlayerFrame.status = "completed";
+                        }
+                        if(currentPlayerFrameIndex) {
+                            frames[currentPlayerFrameIndex] = currentPlayerFrame;
+                            console.log("frames after frames update: " + JSON.stringify(frames));
                         }
                     } else {
                         console.log(`Adding new frame to frames...`);
@@ -256,6 +266,7 @@ io.on('connection', (socket) => {
                             gameId: game.id,
                             rolls: [message.payload.knockedPins],
                             id: message.payload.frameId,
+                            status: "pending",
                             result: calcFrameResult([message.payload.knockedPins])
                         };
                         currentPlayerFrame = toPush;
@@ -264,44 +275,56 @@ io.on('connection', (socket) => {
                     }
 
                     console.log("Frames so far: " + JSON.stringify(frames));
+
                     game.frames = frames;
+                    game.markModified("frames");
                     var playersCount = game.players.length;
-                    var currentFrames = find(game.frames, (frame)=>{
-                            return frame.id == game.currentFrame;
-                        });
-                    if(currentFrames.length == playersCount){
+                    var currentFrames = [];
+                    forEach(game.frames, (frame)=> {
+                        if (frame.id == game.currentFrame) {
+                            currentFrames.push(frame);
+                        }
+                    });
+                    if (currentFrames.length == playersCount && every(game.frames, {status: "completed"})) {
                         game.currentFrame += 1;
                     }
-                    let playerIndex = findIndex(game.players, (p)=>{return p == _user;});
-                    if(currentPlayerFrame && currentPlayerFrame.rolls.length > 1) {
-                        game.currentPlayer = game.players[playerIndex + 1];
+                    let playerIndex = findIndex(game.players, (p)=> {
+                        return p == _user;
+                    });
+                    if (currentPlayerFrame && currentPlayerFrame.rolls.length > 1) {
+                        if(playerIndex + 1 >= game.players.length){
+                            game.currentPlayer = game.players[0];
+                        }else {
+                            game.currentPlayer = game.players[playerIndex + 1];
+                        }
                     }
 
                     console.log("Game rolls which are going to be persisted: " + JSON.stringify(game.frames));
-                    if(isComplete(game)){
+                    if (isComplete(game)) {
                         game.status = 'finished';
                         game.winner = _user;
-                    }else{
+                    } else {
                         game.status = 'in_progress';
                     }
                     console.log("Game before save on-roll: " + JSON.stringify(game));
-                    game.save(function (err, game) {
+                    game.save(function (err, data) {
                         if (!err) {
-                            console.log("About ot broadcast the roll...");
-                            if(game.status == 'finished') {
-                                io.sockets.in(_id).emit('finish', game);
-                                broadcastToOthers(socket, 'finish', game);
-                            }else{
+                            console.log("About to broadcast the roll... with game state = " + JSON.stringify(data));
+                            if (game.status == 'finished') {
+                                io.sockets.in(_id).emit('finish', data);
+                                broadcastToOthers(socket, 'finish', data);
+                            } else {
                                 broadcastToOthers(socket, 'roll', message.payload);
                             }
                         } else {
                             console.log("Error while saving game..." + JSON.stringify(err));
+                            broadcastToOthers(socket, 'error', err);
                             io.sockets.in(_id).emit('error', err);
                         }
                     });
                 }
 
-                if(message.type == "ws/start"){
+                if (message.type == "ws/start") {
                     console.log("Startng game...");
 
                     game.status = 'in_progress';
@@ -331,7 +354,7 @@ proxy.on('upgrade', function (req, socket, head) {
 });
 
 
-if(process.env.NODE_ENV != 'production') {
+if (process.env.NODE_ENV != 'production') {
 
     /* setup static content */
     var webPackServer = new WebpackDevServer(webpack(config), {
