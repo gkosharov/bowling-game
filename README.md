@@ -47,5 +47,14 @@ Client-side
 - Immutable.js 
 
 
+## Author
+
+Georgi Kosharov
+
+## License
+
+MIT
+
+
 
 
