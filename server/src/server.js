@@ -252,9 +252,11 @@ io.on('connection', (socket) => {
                         if (currentPlayerFrame.rolls.length < 2) {
                             currentPlayerFrame.rolls.push(message.payload.knockedPins);
                             currentPlayerFrame.result = calcFrameResult(currentPlayerFrame.rolls)
-                        }else{
+                        }
+                        if(currentPlayerFrame.rolls.length == 2) {
                             currentPlayerFrame.status = "completed";
                         }
+
                         if(currentPlayerFrameIndex) {
                             frames[currentPlayerFrameIndex] = currentPlayerFrame;
                             console.log("frames after frames update: " + JSON.stringify(frames));
@@ -285,7 +287,7 @@ io.on('connection', (socket) => {
                             currentFrames.push(frame);
                         }
                     });
-                    if (currentFrames.length == playersCount && every(game.frames, {status: "completed"})) {
+                    if (currentFrames.length == playersCount && every(currentFrames, {status: "completed"})) {
                         game.currentFrame += 1;
                     }
                     let playerIndex = findIndex(game.players, (p)=> {

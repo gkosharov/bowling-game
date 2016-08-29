@@ -62,7 +62,7 @@ class Game extends Component {
             this.props.roll({
                 id: this.props.id,
                 user: this.props.username,
-                frameId: this.props.frameId || 1,
+                frameId: this.props.currentFrame || 1,
                 knockedPins: getRandomIntInclusive(0, 10)
             });
             setTimeout(function(){
@@ -250,7 +250,6 @@ function mapStateToProps(state, ownProps) {
 
     var lobby = state.get("lobby");
     var gameId = game.get("id") || (ownProps.routeParams && ownProps.routeParams.id ? ownProps.routeParams.id : null);
-    var frameId = game.get("currentFrame") || 1;
     var startingPlayer = game.get("startingPlayer");
     var currentPlayer = game.get("currentPlayer");
     var gameDetails = null;
