@@ -5,7 +5,7 @@
 import { CALL_API } from '../middleware'
 
 
-export const START_GAME = 'ws/startGame';
+export const START_GAME = 'ws/start';
 
 export function startGame(payload) {
     return {

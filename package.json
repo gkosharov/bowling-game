@@ -13,8 +13,9 @@
     "start": "node index",
     "postinstall": "cross-env NODE_ENV=production node deploy",
     "start-local": "cross-env NODE_ENV=development node index",
-    "start-local-prod": "cross-env NODE_ENV=production PORT=5000 node index",
-    "build": "webpack --config ./server/src/webpack.config.js --progress --colors",
+    "start-local-prod": "cross-env NODE_ENV=production PORT=5000 MONGODB_URI=mongodb://localhost:27017/bowling-game node index",
+    "build": "webpack --config webpack.config.js --progress --colors",
+    "build-prod": "webpack --config webpack.prod.config.js --colors",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "engines": {

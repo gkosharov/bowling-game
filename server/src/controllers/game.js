@@ -44,9 +44,10 @@ export function createGame(req, res, next) {
             players: [
                 req.user.username
             ],
-            startingNumber: gameParams.startingNumber,
+            currentFrame: 1,
+            currentPlayer: req.user.username,
             startingPlayer: req.user.username,
-            moves: []
+            frames: []
         },
         function (err, game) {
             if (!err) {

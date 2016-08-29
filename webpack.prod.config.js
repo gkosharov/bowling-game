@@ -27,7 +27,7 @@ module.exports = {
         }),
         new webpack.DefinePlugin({
             "process.env": {
-                "deploymentType": JSON.stringify(process.env.NODE_ENV || "development")
+                "deploymentType": JSON.stringify(process.env.NODE_ENV || "production")
             }
         })
     ],

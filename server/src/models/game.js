@@ -12,6 +12,7 @@ var Game = new Schema({
     frames: [Schema.Types.Mixed],
     currentFrame: Number,
     startingPlayer: String,
+    currentPlayer: String,
     status: String,
     winner: String
 });

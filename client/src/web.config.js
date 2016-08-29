@@ -1,4 +1,4 @@
-const deploymentType = process.env.deploymentType || "development"; //This is evaluated build-time by webpack
+const deploymentType = process.env.deploymentType; //This is evaluated build-time by webpack
 const api_root_cloud = `${location.origin}${location.pathname}api`;
 const api_root_node = `${location.protocol}//${location.hostname}:3033${location.pathname}api`;
 

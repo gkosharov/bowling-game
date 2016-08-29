@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>Bowling</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+<header class="app-header">
+    <div id="logo">Bowling Game Logo</div>
+
+</header>
+<nav class="game-nav">
+    <h2>Available games</h2>
+    <ul class="game-list">
+        <li class="game-item">
+            <div class="game-name">Game 1</div>
+            <div class="game-status finished">Finished</div>
+        </li>
+        <li class="game-item">
+            <div class="game-name">Game 2</div>
+            <div class="game-status pending">Still rolling</div>
+        </li>
+    </ul>
+
+    <div class="global-game-controls">
+        <button class="create-new">Create New</button>
+    </div>
+</nav>
+<main role="main">
+    <section class="game">
+        <h2 class="game-heading">Game 1 - finished</h2>
+
+        <section class="game-content">
+            <table class="score-board">
+                <thead>
+                <tr>
+                    <th class="frame-name">
+                        Player Name
+                    </th>
+                    <th class="frame-name">
+                        1
+                    </th>
+                    <th class="frame-name">
+                        2
+                    </th>
+                    <th class="frame-name">
+                        3
+                    </th>
+                    <th class="frame-name">
+                        4
+                    </th>
+                    <th class="frame-name">
+                        5
+                    </th>
+                    <th class="frame-name">
+                        6
+                    </th>
+                    <th class="frame-name">
+                        7
+                    </th>
+                    <th class="frame-name">
+                        8
+                    </th>
+                    <th class="frame-name">
+                        9
+                    </th>
+                    <th class="frame-name frame-current">
+                        10
+                    </th>
+                    <th class="frame-name">
+                        Total
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr class="current-turn">
+                    <td class="frame-box">
+                        <span class="player-name">Georgi</span>
+                    </td>
+                    <td class="frame-box ">
+                        <div class="frame-inner-box">
+                            <span class="frame-roll-score left">3</span>
+                            <span class="frame-roll-score middle">5</span>
+                        </div>
+                        <div class="frame-inner-box">
+                            <span class="frame-total-score">20</span>
+                        </div>
+                    </td>
+                    <td class="frame-box ">
+                        <div class="frame-inner-box">
+                            <span class="frame-roll-score left">3</span>
+                            <span class="frame-roll-score middle">5</span>
+                        </div>
+                        <div class="frame-inner-box">
+                            <span class="frame-total-score">20</span>
+                        </div>
+                    </td>
+                    <td class="frame-box ">
+                        <div class="frame-inner-box">
+                            <span class="frame-roll-score left">3</span>
+                            <span class="frame-roll-score middle">5</span>
+                        </div>
+                        <div class="frame-inner-box">
+                            <span class="frame-total-score">20</span>
+                        </div>
+                    </td>
+                    <td class="frame-box ">
+                        <div class="frame-inner-box">
+                            <span class="frame-roll-score left">3</span>
+                            <span class="frame-roll-score middle">5</span>
+                        </div>
+                        <div class="frame-inner-box">
+                            <span class="frame-total-score">20</span>
+                        </div>
+                    </td>
+                    <td class="frame-box ">
+                        <div class="frame-inner-box">
+                            <span class="frame-roll-score left">3</span>
+                            <span class="frame-roll-score middle">5</span>
+                        </div>
+                        <div class="frame-inner-box">
+                            <span class="frame-total-score">20</span>
+                        </div>
+                    </td>
+                    <td class="frame-box ">
+                        <div class="frame-inner-box">
+                            <span class="frame-roll-score left">3</span>
+                            <span class="frame-roll-score middle">5</span>
+                        </div>
+                        <div class="frame-inner-box">
+                            <span class="frame-total-score">20</span>
+                        </div>
+                    </td>
+                    <td class="frame-box ">
+                        <div class="frame-inner-box">
+                            <span class="frame-roll-score left">3</span>
+                            <span class="frame-roll-score middle">5</span>
+                        </div>
+                        <div class="frame-inner-box">
+                            <span class="frame-total-score">20</span>
+                        </div>
+                    </td>
+                    <td class="frame-box ">
+                        <div class="frame-inner-box">
+                            <span class="frame-roll-score left">3</span>
+                            <span class="frame-roll-score middle">5</span>
+                        </div>
+                        <div class="frame-inner-box">
+                            <span class="frame-total-score">20</span>
+                        </div>
+                    </td>
+                    <td class="frame-box ">
+                        <div class="frame-inner-box">
+                            <span class="frame-roll-score left">3</span>
+                            <span class="frame-roll-score middle">5</span>
+                        </div>
+                        <div class="frame-inner-box">
+                            <span class="frame-total-score">20</span>
+                        </div>
+                    </td>
+                    <td class="frame-box frame-current">
+                        <div class="frame-inner-box">
+                            <span class="frame-roll-score left">X</span>
+                            <span class="frame-roll-score middle">5</span>
+                            <span class="frame-roll-score right">5</span>
+                        </div>
+                        <div class="frame-inner-box">
+                            <span class="frame-total-score">20</span>
+                        </div>
+                    </td>
+                    <td class="frame-box">
+                        <span class="total">200</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="frame-box">
+                        <span class="player-name">Kris</span>
+                    </td>
+                    <td class="frame-box ">
+                        <div class="frame-inner-box">
+                            <span class="frame-roll-score left">3</span>
+                            <span class="frame-roll-score middle">5</span>
+                        </div>
+                        <div class="frame-inner-box">
+                            <span class="frame-total-score">20</span>
+                        </div>
+                    </td>
+                    <td class="frame-box ">
+                        <div class="frame-inner-box">
+                            <span class="frame-roll-score left">3</span>
+                            <span class="frame-roll-score middle">5</span>
+                        </div>
+                        <div class="frame-inner-box">
+                            <span class="frame-total-score">20</span>
+                        </div>
+                    </td>
+                    <td class="frame-box ">
+                        <div class="frame-inner-box">
+                            <span class="frame-roll-score left">3</span>
+                            <span class="frame-roll-score middle">5</span>
+                        </div>
+                        <div class="frame-inner-box">
+                            <span class="frame-total-score">20</span>
+                        </div>
+                    </td>
+                    <td class="frame-box ">
+                        <div class="frame-inner-box">
+                            <span class="frame-roll-score left">3</span>
+                            <span class="frame-roll-score middle">5</span>
+                        </div>
+                        <div class="frame-inner-box">
+                            <span class="frame-total-score">20</span>
+                        </div>
+                    </td>
+                    <td class="frame-box ">
+                        <div class="frame-inner-box">
+                            <span class="frame-roll-score left">3</span>
+                            <span class="frame-roll-score middle">5</span>
+                        </div>
+                        <div class="frame-inner-box">
+                            <span class="frame-total-score">20</span>
+                        </div>
+                    </td>
+                    <td class="frame-box ">
+                        <div class="frame-inner-box">
+                            <span class="frame-roll-score left">3</span>
+                            <span class="frame-roll-score middle">5</span>
+                        </div>
+                        <div class="frame-inner-box">
+                            <span class="frame-total-score">20</span>
+                        </div>
+                    </td>
+                    <td class="frame-box ">
+                        <div class="frame-inner-box">
+                            <span class="frame-roll-score left">3</span>
+                            <span class="frame-roll-score middle">5</span>
+                        </div>
+                        <div class="frame-inner-box">
+                            <span class="frame-total-score">20</span>
+                        </div>
+                    </td>
+                    <td class="frame-box ">
+                        <div class="frame-inner-box">
+                            <span class="frame-roll-score left">3</span>
+                            <span class="frame-roll-score middle">5</span>
+                        </div>
+                        <div class="frame-inner-box">
+                            <span class="frame-total-score">20</span>
+                        </div>
+                    </td>
+                    <td class="frame-box ">
+                        <div class="frame-inner-box">
+                            <span class="frame-roll-score left">3</span>
+                            <span class="frame-roll-score middle">5</span>
+                        </div>
+                        <div class="frame-inner-box">
+                            <span class="frame-total-score">20</span>
+                        </div>
+                    </td>
+                    <td class="frame-box">
+                        <div class="frame-inner-box">
+                            <span class="frame-roll-score left">X</span>
+                            <span class="frame-roll-score middle">5</span>
+                            <span class="frame-roll-score right">4</span>
+                        </div>
+                        <div class="frame-inner-box">
+                            <span class="frame-total-score">20</span>
+                        </div>
+                    </td>
+                    <td class="frame-box">
+                        <span class="total">300</span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+        </section>
+        <footer>
+            <button class="roll-button" title="Random roll">Roll</button>
+            <div class="score-on-roll">
+                <span class="label">Last roll score</span><span class="big-size-number">6</span>
+            </div>
+        </footer>
+        <div class="winner-container">
+            <label class="winner-label">Winner</label><span class="winner-name">Kris</span>
+        </div>
+    </section>
+
+
+</main>
+
+<footer class="app-footer">
+    License: MIT
+</footer>
+</body>
+</html>

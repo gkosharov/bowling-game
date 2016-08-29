@@ -29,6 +29,8 @@ import mongoSeed from './mongoSeed'
 import User from './models/user'
 import isArray from 'lodash/lang/isArray'
 import includes from 'lodash/collection/includes'
+import find from 'lodash/collection/find'
+import findIndex from 'lodash/array/findIndex'
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
@@ -170,6 +172,14 @@ function isComplete(game){
 
     return isComplete;
 }
+
+function calcFrameResult(rolls){
+    var result = 0;
+    for(var i=0; i<rolls.length; i++){
+        result+=rolls[i];
+    }
+    return result;
+}
 /* Websocket API */
 io.on('connection', (socket) => {
     if(NODE_ENV=='development') {
@@ -201,7 +211,6 @@ io.on('connection', (socket) => {
                 // Remember this for later
                 _id = game.id;
 
-
                 if(message.type == "ws/join"){
                     socket.join(_id);
 
@@ -229,25 +238,45 @@ io.on('connection', (socket) => {
                     console.log(`Player ${_user} rolls: [${message.payload.knockedPins}] on frame ${message.payload.frameId}, current score: ${message.payload.result}`);
                     var frames = game.frames && isArray(game.frames) ? game.frames: [];
                     console.log("Rolls before push: " + JSON.stringify(frames));
-                    var toPush = {
-                        playerId: _user,
-                        frameId: message.payload.frameId,
-                        knockedPins: message.payload.knockedPins,
-                        result: message.payload.result
-                    };
+                    var currentPlayerFrame = find(game.frames, (f)=>{
+                        return f.playerId = _user && f.id == game.currentFrame;
+                    });
 
-                    console.log("To push: " + JSON.stringify(toPush));
-                    frames.push(toPush);
+                    var toPush = {};
+                    if(currentPlayerFrame){
+                        console.log(`Updating the rolls of current frame ${currentPlayerFrame.id}...`);
+                        if(currentPlayerFrame.rolls.length < 2) {
+                            currentPlayerFrame.rolls.push(message.payload.knockedPins);
+                            currentPlayerFrame.result = calcFrameResult(currentPlayerFrame.rolls)
+                        }
+                    } else {
+                        console.log(`Adding new frame to frames...`);
+                        toPush = {
+                            playerId: _user,
+                            gameId: game.id,
+                            rolls: [message.payload.knockedPins],
+                            id: message.payload.frameId,
+                            result: calcFrameResult([message.payload.knockedPins])
+                        };
+                        currentPlayerFrame = toPush;
+                        console.log("To push: " + JSON.stringify(toPush));
+                        frames.push(toPush);
+                    }
 
-                    console.log("Rolls so far: " + JSON.stringify(rolls));
+                    console.log("Frames so far: " + JSON.stringify(frames));
                     game.frames = frames;
                     var playersCount = game.players.length;
                     var currentFrames = find(game.frames, (frame)=>{
-                            return id == game.currentFrame;
+                            return frame.id == game.currentFrame;
                         });
                     if(currentFrames.length == playersCount){
                         game.currentFrame += 1;
                     }
+                    let playerIndex = findIndex(game.players, (p)=>{return p == _user;});
+                    if(currentPlayerFrame && currentPlayerFrame.rolls.length > 1) {
+                        game.currentPlayer = game.players[playerIndex + 1];
+                    }
+
                     console.log("Game rolls which are going to be persisted: " + JSON.stringify(game.frames));
                     if(isComplete(game)){
                         game.status = 'finished';
@@ -273,24 +302,15 @@ io.on('connection', (socket) => {
                 }
 
                 if(message.type == "ws/start"){
-                    console.log(`Player ${_user} rolls: [${message.payload.knockedPins}, ${message.payload.result}]`);
+                    console.log("Startng game...");
 
-                    game.rolls.push({
-                        player: _user,
-                        knockedPins: message.payload.knockedPins,
-                        result: message.payload.result
-                    });
-
-                    if(message.payload.result == 1){
-                        game.status = 'finished';
-                        game.winner = _user;
-                    }
+                    game.status = 'in_progress';
 
                     game.save(function (err, game) {
                         if (!err) {
-                            io.sockets.in(_id).emit('finish', game);
+                            broadcastToOthers(socket, 'start', game);
                         } else {
-                            io.sockets.in(_id).emit('error', err);
+                            broadcastToOthers(socket, 'error', game);
                         }
                     });
                 }

@@ -18,11 +18,12 @@ import {
 import AppBar from 'material-ui/AppBar'
 import CircularProgress from 'material-ui/CircularProgress'
 import Center from 'react-center'
-import {loadGameData, roll, triggerStartGame} from '../../actions/Game'
+import {loadGameData, roll, triggerStartGame, loadGames} from '../../actions/Game'
 import {triggerMessage} from '../../actions/Common'
 import map from 'lodash/collection/map'
 import forEach from 'lodash/collection/forEach'
 import findLast from 'lodash/collection/findLast'
+import find from 'lodash/collection/find'
 import {connect} from 'react-redux'
 import {triggerError} from '../../actions/Error'
 import getRandomIntInclusive from '../../utils/getRandomIntInclusive'
@@ -59,11 +60,14 @@ class Game extends Component {
         console.log("Player rolled!");
         if (this.props.roll) {
             this.props.roll({
-                gameId: this.props.id,
-                playerId: this.props.playerId,
+                id: this.props.id,
+                user: this.props.username,
                 frameId: this.props.frameId || 1,
                 knockedPins: getRandomIntInclusive(0, 10)
             });
+            setTimeout(function(){
+                if(this.props.loadGames) this.props.loadGames('/games');
+            }.bind(this), 500);
         }
     }
 
@@ -71,11 +75,11 @@ class Game extends Component {
         console.log("Game started");
         if (this.props.triggerStartGame) {
             this.props.triggerStartGame({
-                gameId: this.props.game.id,
-                playerId: this.props.playerId,
-                frameId: this.props.frameId,
-                knockedPins: getRandomIntInclusive(0, 10)
+                id: this.props.id
             });
+            setTimeout(function(){
+                if(this.props.loadGames) this.props.loadGames('/games');
+            }.bind(this), 500);
         }
     }
 
@@ -84,18 +88,21 @@ class Game extends Component {
         forEach(this.props.players, (player)=> {
             let columns = [];
             let total = 0;
-            let playerFrames = find(this.props.frames, (frame)=> {
-                return frames.playerId == player;
+            let playerFrames = [];
+            forEach(this.props.frames, (frame)=> {
+                if(frame.playerId == player){
+                    playerFrames.push(frame);
+                };
             });
             columns.push(
                 <TableRowColumn>{player}</TableRowColumn>
             );
-            for (var i = 0; i < 10; i++) {
-                let frame = findLast(playerFrames, (f)=> {
+            for (var i = 1; i <= 10; i++) {
+                let frame = find(playerFrames, (f)=> {
                     return f.id == i;
                 });
                 let rolls = frame ? frame.rolls : [];
-                let result = frame ? frame.result : "";
+                let result = frame ? frame.result : 0;
                 total+=result;
                 columns.push(
                     <TableRowColumn>
@@ -142,7 +149,23 @@ class Game extends Component {
 
         return result;
     }
+    renderActionButtons(buttonStyle){
+        var buttons = [];
+        if(this.props.startingPlayer == this.props.username && this.props.status == "waiting") {
+            buttons.push(
+                <Button label="Start" primary={true} style={buttonStyle} onClick={this.onStartGame.bind(this)}/>
+            );
+        }
+        if(this.props.status != "waiting" && this.props.currentPlayer == this.props.username){
+            buttons.push(
+                <Button label="Roll" primary={true} style={buttonStyle} onClick={this.onRoll.bind(this)}/>);
 
+        }
+        buttons.push(
+            <Button label="Quit" primary={true} style={buttonStyle} onClick={this.onLeaveGame.bind(this)}/>
+        );
+        return buttons;
+    }
     render() {
         const {topOffset, leftOffset} = this.props;
         const buttonStyle = {
@@ -202,12 +225,10 @@ class Game extends Component {
                         </TableBody>
                     </Table>
                     <Divider/>
-                    <Button label="Roll" primary={true} style={buttonStyle}
-                            onClick={this.onRoll.bind(this)}/>
-                    <Button label="Quit" primary={true} style={buttonStyle}
-                            onClick={this.onLeaveGame.bind(this)}/>
-                    <Button label="Start" primary={true} style={buttonStyle}
-                            onClick={this.onStartGame.bind(this)}/>
+                    {this.renderActionButtons(buttonStyle)}
+
+
+
                 </div>
             )
         }
@@ -230,6 +251,8 @@ function mapStateToProps(state, ownProps) {
     var lobby = state.get("lobby");
     var gameId = game.get("id") || (ownProps.routeParams && ownProps.routeParams.id ? ownProps.routeParams.id : null);
     var frameId = game.get("currentFrame") || 1;
+    var startingPlayer = game.get("startingPlayer");
+    var currentPlayer = game.get("currentPlayer");
     var gameDetails = null;
     if (gameId) {
         gameDetails = lobby.get("games").find((item)=> {
@@ -240,7 +263,7 @@ function mapStateToProps(state, ownProps) {
     if (game.toJS) game = game.toJS();
     if (gameDetails && gameDetails.toJS) {
         gameDetails = gameDetails.toJS();
-        game = Object.assign({}, gameDetails, game);
+        game = Object.assign({}, game, gameDetails);
     }
 
     return Object.assign({}, ownProps, login, game);
@@ -251,6 +274,7 @@ export default connect(mapStateToProps, {
     roll,
     triggerError,
     loadGameData,
+    loadGames,
     push,
     triggerMessage,
     triggerStartGame

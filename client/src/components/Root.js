@@ -40,16 +40,6 @@ socket.on('joined', (data)=> {
     console.log("Joined! -> " + JSON.stringify(data));
     if (store.dispatch) {
         store.dispatch(loadGames("/games"));
-
-        /*var state = store.getState();
-        var lobby = state.get("lobby");
-        var user = state.getIn(["login", "username"]);
-        var game = lobby.get("games").find((item)=> {
-            return item.get("id") == data.id
-        });*/
-
-        //store.dispatch(roll({user: user, id: game.get("id"), knockedPins: getRandomIntInclusive(0, 10)}));
-
     }
 });
 
@@ -63,17 +53,7 @@ socket.on('ready', (data)=> {
 socket.on('roll', (data)=> {
     console.log("roll! -> " + JSON.stringify(data));
     if (store.dispatch) {
-        store.dispatch(rollFromOtherPlayer(data));
-        /*setTimeout(()=> {
-         var state = store.getState();
-         var lobby = state.get("lobby");
-         var user = state.getIn(["login", "username"]);
-         var game = lobby.get("games").find((item)=> {
-         return item.get("id") == data.id;
-         });
-         var rollData = calcroll(data);
-         store.dispatch(roll(Object.assign({}, {id: game.get("id"), user: user}, rollData)));
-         }, 1000);*/
+        store.dispatch(loadGames("/games"));
     }
 });
 
@@ -94,6 +74,7 @@ socket.on('finish', (data)=> {
 
 socket.on('start', (data)=> {
     console.log("Start! -> " + JSON.stringify(data));
+    store.dispatch(loadGames("/games"));
 });
 
 /* here we go */
